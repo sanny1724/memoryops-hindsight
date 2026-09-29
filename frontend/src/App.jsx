@@ -128,7 +128,10 @@ export default function App() {
 
   // ── Analyze Incident ──
   const handleAnalyze = async () => {
-    if (!incident.title || !incident.description) return;
+    if (!incident.title.trim() || !incident.description.trim()) {
+      setAnalysisError('Please provide both an incident title and description before analyzing.');
+      return;
+    }
     setAnalyzing(true);
     setAnalysisResult(null);
     setAnalysisError('');
@@ -147,8 +150,10 @@ export default function App() {
       logActivity('REFLECT: Memory context synthesized', 'reflect');
       logActivity('Groq LLM generated memory-informed recommendation', 'info');
     } catch (e) {
-      setAnalysisError(e.response?.data?.detail || 'Analysis failed. Check backend connection.');
-      logActivity('Analysis failed', 'error');
+      // Use the friendly message from the API interceptor when available
+      const msg = e.message || e.response?.data?.detail || 'Analysis failed. Check backend connection.';
+      setAnalysisError(msg);
+      logActivity(`Analysis failed: ${msg}`, 'error');
     } finally {
       setAnalyzing(false);
     }
@@ -176,8 +181,9 @@ export default function App() {
       logActivity(`RETAIN: Incident ${res.data.incident_id} saved to memory`, 'retain');
       await checkMemory();
     } catch (e) {
-      setSaveMsg(`❌ ${e.response?.data?.detail || 'Save failed'}`);
-      logActivity('RETAIN operation failed', 'error');
+      const msg = e.message || e.response?.data?.detail || 'Save failed';
+      setSaveMsg(`❌ ${msg}`);
+      logActivity(`RETAIN failed: ${msg}`, 'error');
     } finally {
       setSaving(false);
     }
