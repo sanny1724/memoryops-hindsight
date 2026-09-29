@@ -144,6 +144,9 @@ memoryops-hindsight/
 ├── backend/
 │   ├── data/
 │   │   └── sample_incidents.json   # Sample historical incidents for seeding
+│   ├── tests/
+│   │   ├── conftest.py             # Pytest configuration
+│   │   └── test_api.py             # Health check and input validation tests
 │   ├── main.py                     # FastAPI server, endpoints, Groq & Hindsight logic
 │   ├── requirements.txt            # Python dependencies
 │   └── .env.example                # Backend environment template
@@ -153,7 +156,7 @@ memoryops-hindsight/
 │   │   └── icons.svg
 │   ├── src/
 │   │   ├── assets/
-│   │   ├── api.js                  # Axios API service
+│   │   ├── api.js                  # Axios API client with error handling
 │   │   ├── App.css                 # Component styles
 │   │   ├── App.jsx                 # Main incident dashboard
 │   │   ├── index.css               # Global theme & layout styles
@@ -164,6 +167,7 @@ memoryops-hindsight/
 │   ├── package.json                # Frontend package dependencies
 │   └── vite.config.js              # Vite configuration
 ├── ARCHITECTURE.md                 # System architecture documentation
+├── DEVELOPMENT_LOG.md              # Verified development timeline
 ├── README.md                       # Project overview & documentation
 ├── .env.example                    # Root environment variable template
 └── .gitignore                      # Root Git ignore rules
@@ -224,6 +228,15 @@ uvicorn main:app --host 127.0.0.1 --port 8000
 
 Verify backend health: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
 
+#### Running Backend Tests
+
+```bash
+# From the backend/ directory
+python -m pytest tests/ -v
+```
+
+Expected output: **11 passed** (health endpoint + input validation tests).
+
 ### 4. Frontend Setup
 
 In a separate terminal window:
@@ -239,6 +252,22 @@ npm run dev
 ```
 
 Open your browser at: [http://localhost:5173](http://localhost:5173)
+
+---
+
+## 🔧 Troubleshooting
+
+### Backend won't start — `ModuleNotFoundError`
+Run `pip install -r requirements.txt` from the `backend/` directory. On Python 3.14, `pydantic-core` requires a Rust toolchain — if it fails to build, use Python 3.11 or 3.12 with a pre-built wheel.
+
+### Hindsight returns empty results
+Ensure `HINDSIGHT_API_KEY` is set in your `.env`. The SDK does **not** auto-read environment variables — the key must be passed explicitly. After verifying credentials, seed the memory bank via the **Seed Memory** button in the UI.
+
+### Groq returns 404 for a model
+The model `llama-3.3-70b-versatile` was deprecated. Use `GROQ_MODEL=qwen/qwen3.8-27b` (the current tested default). If the model is also unavailable, check [console.groq.com](https://console.groq.com) for the current model list.
+
+### Frontend shows "Cannot reach the MemoryOps backend"
+Confirm the FastAPI server is running (`uvicorn main:app --host 127.0.0.1 --port 8000` from `backend/`) and that `VITE_API_URL=http://localhost:8000` in `frontend/.env`.
 
 ---
 

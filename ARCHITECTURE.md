@@ -105,7 +105,7 @@ OBSERVE is for streaming real-time data. Our use case is discrete incidents stor
 
 ### Why Groq?
 
-Groq provides very fast inference (~200 tokens/sec on llama-3.3-70b), making the demo feel responsive. The architecture is LLM-agnostic – any OpenAI-compatible API would work.
+Groq provides very fast LLM inference, making the demo feel responsive. The current configured model is `qwen/qwen3.8-27b`. Note: `llama-3.3-70b-versatile` was deprecated and removed from Groq during development. The architecture is LLM-agnostic — any OpenAI-compatible API would work by changing `GROQ_MODEL` in `.env`.
 
 ## Limitations (MVP Scope)
 
